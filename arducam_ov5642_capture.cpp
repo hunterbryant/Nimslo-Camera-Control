@@ -37,9 +37,9 @@ void setup()
     if(temp != 0x55) {
         printf("SPI interface error!\n");
         exit(EXIT_FAILURE);
-    }  
+    }
     // Change MCU mode
-    myCAM.write_reg(ARDUCHIP_MODE, 0x00); 
+    myCAM.write_reg(ARDUCHIP_MODE, 0x00);
     myCAM.wrSensorReg16_8(0xff, 0x01);
     myCAM.rdSensorReg16_8(OV5642_CHIPID_HIGH, &vid);
     myCAM.rdSensorReg16_8(OV5642_CHIPID_LOW, &pid);
@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
         printf(" -c <filename>   Capture image\n");
         exit(EXIT_SUCCESS);
     }
-  	if (strcmp(argv[1], "-c") == 0 && argc == 4) 
+  	if (strcmp(argv[1], "-c") == 0 && argc == 4)
   	{
-      setup(); 
+      setup();
       myCAM.set_format(JPEG);
       myCAM.InitCAM();
-      // Change to JPEG capture mode and initialize the OV2640 module   
+      // Change to JPEG capture mode and initialize the OV2640 module
       if (strcmp(argv[3], "320x240")  == 0) myCAM.OV5642_set_JPEG_size(OV5642_320x240);
       else if (strcmp(argv[3], "640x480")  == 0) myCAM.OV5642_set_JPEG_size(OV5642_640x480);
       else if (strcmp(argv[3], "1280x960")  == 0) myCAM.OV5642_set_JPEG_size(OV5642_1280x960);
@@ -81,26 +81,26 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
       }
       sleep(1); // Let auto exposure do it's thing after changing image settings
-      printf("Changed resolution1 to %s\n", argv[3]); 
-      myCAM.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH   	  
+      printf("Changed resolution1 to %s\n", argv[3]);
+      myCAM.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH
        // Flush the FIFO
-      myCAM.flush_fifo();    
+      myCAM.flush_fifo();
       // Clear the capture done flag
       myCAM.clear_fifo_flag();
       // Start capture
-      printf("Start capture\n");  
+      printf("Start capture\n");
       myCAM.start_capture();
       while (!(myCAM.read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)){}
       printf("CAM Capture Done\n");
-              
+
        // Open the new file
-      FILE *fp1 = fopen(argv[2], "w+");   
+      FILE *fp1 = fopen(argv[2], "w+");
       if (!fp1) {
           printf("Error: could not open %s\n", argv[2]);
           exit(EXIT_FAILURE);
       }
-       
-      printf("Reading FIFO and saving IMG\n");    
+
+      printf("Reading FIFO and saving IMG\n");
       size_t length = myCAM.read_fifo_length();
       printf("The length is %d\r\n", length);
       if (length >= OV5642_MAX_FIFO_SIZE){
@@ -109,11 +109,11 @@ int main(int argc, char *argv[])
 		  }else if (length == 0 ){
 		    printf("Size is 0.");
 		    exit(EXIT_FAILURE);
-		  } 
+		  }
 	    int32_t i=0;
-	    myCAM.CS_LOW();  //Set CS low       
+	    myCAM.CS_LOW();  //Set CS low
       myCAM.set_fifo_burst();
-     
+
       while ( length-- )
 		  {
 		    temp_last = temp;
@@ -121,18 +121,18 @@ int main(int argc, char *argv[])
 		    //Read JPEG data from FIFO
 		    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
 		    {
-		        buf[i++] = temp;  //save the last  0XD9     
+		        buf[i++] = temp;  //save the last  0XD9
 		       //Write the remain bytes in the buffer
 		        myCAM.CS_HIGH();
-		        fwrite(buf, i, 1, fp1);    
+		        fwrite(buf, i, 1, fp1);
 		       //Close the file
-		        fclose(fp1); 
-		        printf("IMG save OK !\n"); 
+		        fclose(fp1);
+		        printf("IMG save OK !\n");
 		        is_header = false;
 		        i = 0;
-		    }  
+		    }
 		    if (is_header == true)
-		    { 
+		    {
 		       //Write image data to buffer if not full
 		        if (i < BUF_SIZE)
 		        buf[i++] = temp;
@@ -141,20 +141,21 @@ int main(int argc, char *argv[])
 		          //Write BUF_SIZE bytes image data to file
 		          myCAM.CS_HIGH();
 		          fwrite(buf, BUF_SIZE, 1, fp1);
+							printf("W ");
 		          i = 0;
 		          buf[i++] = temp;
 		          myCAM.CS_LOW();
 		          myCAM.set_fifo_burst();
-		        }        
+		        }
 		    }
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
 		      buf[i++] = temp_last;
-		      buf[i++] = temp;   
-		    } 
+		      buf[i++] = temp;
+		    }
 		  }
-  } 
+  }
   else  {
       printf("Error: unknown or missing argument.\n");
       exit(EXIT_FAILURE);
