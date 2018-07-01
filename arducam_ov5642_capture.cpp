@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
-					printf("Is NOW header");
+					printf("Isn't header");
 		      buf[i++] = temp_last;
 		      buf[i++] = temp;
 		    }
