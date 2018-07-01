@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
 		        is_header = false;
 		        i = 0;
 		    }
+				printf("R ");
 		    if (is_header == true)
 		    {
 		       //Write image data to buffer if not full
@@ -141,7 +142,6 @@ int main(int argc, char *argv[])
 		          //Write BUF_SIZE bytes image data to file
 		          myCAM.CS_HIGH();
 		          fwrite(buf, BUF_SIZE, 1, fp1);
-							printf("W ");
 		          i = 0;
 		          buf[i++] = temp;
 		          myCAM.CS_LOW();
