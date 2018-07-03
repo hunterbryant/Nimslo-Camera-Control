@@ -46,7 +46,7 @@ void setup()
     if(temp != 0x55) {
         printf("SPI1 interface error!\n");
         exit(EXIT_FAILURE);
-    } 	
+    }
     // Check if the ArduCAM SPI2 bus is OK
     myCAM2.write_reg(ARDUCHIP_TEST1, 0x55);
     temp = myCAM2.read_reg(ARDUCHIP_TEST1);
@@ -54,7 +54,7 @@ void setup()
     if(temp != 0x55) {
         printf("SPI2 interface error!\n");
         exit(EXIT_FAILURE);
-    }   	
+    }
     // Check if the ArduCAM SPI3 bus is OK
     myCAM3.write_reg(ARDUCHIP_TEST1, 0x55);
     temp = myCAM3.read_reg(ARDUCHIP_TEST1);
@@ -62,7 +62,7 @@ void setup()
     if(temp != 0x55) {
         printf("SPI3 interface error!\n");
         exit(EXIT_FAILURE);
-    } 
+    }
      // Check if the ArduCAM SPI4 bus is OK
     myCAM4.write_reg(ARDUCHIP_TEST1, 0x55);
     temp = myCAM4.read_reg(ARDUCHIP_TEST1);
@@ -72,10 +72,10 @@ void setup()
         exit(EXIT_FAILURE);
     }
     // Change MCU mode
-    myCAM1.write_reg(ARDUCHIP_MODE, 0x00); 
-    myCAM2.write_reg(ARDUCHIP_MODE, 0x00); 
-    myCAM3.write_reg(ARDUCHIP_MODE, 0x00); 
-    myCAM4.write_reg(ARDUCHIP_MODE, 0x00); 
+    myCAM1.write_reg(ARDUCHIP_MODE, 0x00);
+    myCAM2.write_reg(ARDUCHIP_MODE, 0x00);
+    myCAM3.write_reg(ARDUCHIP_MODE, 0x00);
+    myCAM4.write_reg(ARDUCHIP_MODE, 0x00);
     myCAM1.wrSensorReg16_8(0xff, 0x01);
     myCAM1.rdSensorReg16_8(OV5642_CHIPID_HIGH, &vid);
     myCAM1.rdSensorReg16_8(OV5642_CHIPID_LOW, &pid);
@@ -100,12 +100,18 @@ int main(int argc, char *argv[])
         printf(" -c <filename>   Capture image\n");
         exit(EXIT_SUCCESS);
     }
-  	if (strcmp(argv[1], "-c") == 0 && argc == 7) 
+  	if (strcmp(argv[1], "-c") == 0 && argc == 7)
   	{
-      setup(); 
+      setup();
       myCAM1.set_format(JPEG);
       myCAM1.InitCAM();
-       // Change to JPEG capture mode and initialize the OV2640 module   
+			// Set shooting settings
+			myCAM1.OV5642_set_Light_Mode(Simple_AWB);
+			myCAM1.OV5642_set_Color_Saturation(Saturation_1);
+			myCAM1.OV5642_set_Brightness(Brightness1);
+			myCAM1.OV5642_set_Contrast(Contrast_1);
+			myCAM1.OV5642_set_Exposure_level(Exposure07_EV);
+       // Change to JPEG capture mode and initialize the OV2640 module
       if (strcmp(argv[6], "320x240")  == 0) myCAM1.OV5642_set_JPEG_size(OV5642_320x240);
       else if (strcmp(argv[6], "640x480")  == 0) myCAM1.OV5642_set_JPEG_size(OV5642_640x480);
       else if (strcmp(argv[6], "1280x960")  == 0) myCAM1.OV5642_set_JPEG_size(OV5642_1280x960);
@@ -117,58 +123,58 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
       }
       sleep(1); // Let auto exposure do it's thing after changing image settings
-      printf("Changed resolution1 to %s\n", argv[6]); 
-      myCAM1.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH  
-      myCAM2.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH 
-	  myCAM3.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH 
-      myCAM4.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH    	  
+      printf("Changed resolution1 to %s\n", argv[6]);
+      myCAM1.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH
+      myCAM2.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH
+	  myCAM3.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH
+      myCAM4.write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);		//VSYNC is active HIGH
      // Flush the FIFO
-        myCAM1.flush_fifo();    
+        myCAM1.flush_fifo();
         // Clear the capture done flag
         myCAM1.clear_fifo_flag();
         // Start capture
-        printf("CAM1 start capture\n");  
+        printf("CAM1 start capture\n");
         myCAM1.start_capture();
         while (!(myCAM1.read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)) ;
          printf("CAM1 Capture Done\n");
-        
+
         // Flush the FIFO
-        myCAM2.flush_fifo();    
+        myCAM2.flush_fifo();
         // Clear the capture done flag
         myCAM2.clear_fifo_flag();
         // Start capture
-        printf("CAM2 start capture\n");  
+        printf("CAM2 start capture\n");
         myCAM2.start_capture();
         while (!(myCAM2.read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)) ;
         printf("CAM2 Capture Done\n");
-        
+
          // Flush the FIFO
-        myCAM3.flush_fifo();    
+        myCAM3.flush_fifo();
         // Clear the capture done flag
         myCAM3.clear_fifo_flag();
         // Start capture
-        printf("CAM3 start capture\n");  
+        printf("CAM3 start capture\n");
         myCAM3.start_capture();
         while (!(myCAM3.read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)) ;
         printf("CAM3 Capture Done\n");
-        
+
          // Flush the FIFO
-        myCAM4.flush_fifo();    
+        myCAM4.flush_fifo();
         // Clear the capture done flag
         myCAM4.clear_fifo_flag();
         // Start capture
-        printf("CAM4 start capture\n");  
+        printf("CAM4 start capture\n");
         myCAM4.start_capture();
         while (!(myCAM4.read_reg(ARDUCHIP_TRIG) & CAP_DONE_MASK)) ;
         printf("CAM4 Capture Done\n");
-         
-            
+
+
          // Open the new file
         FILE *fp1 = fopen(argv[2], "w+");
          FILE *fp2 = fopen(argv[3], "w+");
           FILE *fp3 = fopen(argv[4], "w+");
            FILE *fp4 = fopen(argv[5], "w+");
-        
+
         if (!fp1) {
             printf("Error: could not open %s\n", argv[2]);
             exit(EXIT_FAILURE);
@@ -184,9 +190,9 @@ int main(int argc, char *argv[])
         if (!fp4) {
             printf("Error: could not open %s\n", argv[5]);
             exit(EXIT_FAILURE);
-        } 
-         printf("Reading FIFO and saving IMG\n");  
-        
+        }
+         printf("Reading FIFO and saving IMG\n");
+
         size_t len1 = myCAM1.read_fifo_length();
         size_t len2 = myCAM2.read_fifo_length();
         size_t len3 = myCAM3.read_fifo_length();
@@ -199,12 +205,12 @@ int main(int argc, char *argv[])
 		   printf("Over size.");
 		    exit(EXIT_FAILURE);
 		  }
-		  if (len1 == 0 ) printf("Size1 is 0."); 
-		  if (len2 == 0 ) printf("Size2 is 0."); 
-		  if (len3 == 0 ) printf("Size3 is 0."); 
-		  if (len4 == 0 ) printf("Size4 is 0.");  
-      int32_t i = 0; 
-      myCAM1.CS_LOW();  //Set CS low       
+		  if (len1 == 0 ) printf("Size1 is 0.");
+		  if (len2 == 0 ) printf("Size2 is 0.");
+		  if (len3 == 0 ) printf("Size3 is 0.");
+		  if (len4 == 0 ) printf("Size4 is 0.");
+      int32_t i = 0;
+      myCAM1.CS_LOW();  //Set CS low
       myCAM1.set_fifo_burst();
       while ( len1-- )
 		  {
@@ -213,18 +219,18 @@ int main(int argc, char *argv[])
 		    //Read JPEG data from FIFO
 		    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
 		    {
-		        buf[i++] = temp;  //save the last  0XD9     
+		        buf[i++] = temp;  //save the last  0XD9
 		       //Write the remain bytes in the buffer
 		        myCAM1.CS_HIGH();
-		        fwrite(buf, i, 1, fp1);    
+		        fwrite(buf, i, 1, fp1);
 		       //Close the file
-		        fclose(fp1); 
-		        printf("IMG1 save OK !\n"); 
+		        fclose(fp1);
+		        printf("IMG1 save OK !\n");
 		        is_header = false;
 		        i = 0;
-		    }  
+		    }
 		    if (is_header == true)
-		    { 
+		    {
 		       //Write image data to buffer if not full
 		        if (i < BUF_SIZE)
 		        buf[i++] = temp;
@@ -237,18 +243,18 @@ int main(int argc, char *argv[])
 		          buf[i++] = temp;
 		          myCAM1.CS_LOW();
 		          myCAM1.set_fifo_burst();
-		        }        
+		        }
 		    }
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
 		      buf[i++] = temp_last;
-		      buf[i++] = temp;   
-		    } 
+		      buf[i++] = temp;
+		    }
 		  }
-		  
+
        temp = 0;temp_last = 0; i = 0;
-      myCAM2.CS_LOW();  //Set CS low       
+      myCAM2.CS_LOW();  //Set CS low
       myCAM2.set_fifo_burst();
        while ( len2-- )
 		  {
@@ -257,18 +263,18 @@ int main(int argc, char *argv[])
 		    //Read JPEG data from FIFO
 		    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
 		    {
-		        buf[i++] = temp;  //save the last  0XD9     
+		        buf[i++] = temp;  //save the last  0XD9
 		       //Write the remain bytes in the buffer
 		        myCAM2.CS_HIGH();
-		        fwrite(buf, i, 1, fp2);    
+		        fwrite(buf, i, 1, fp2);
 		       //Close the file
-		        fclose(fp2); 
-		        printf("IMG2 save OK !\n"); 
+		        fclose(fp2);
+		        printf("IMG2 save OK !\n");
 		        is_header = false;
 		        i = 0;
-		    }  
+		    }
 		    if (is_header == true)
-		    { 
+		    {
 		       //Write image data to buffer if not full
 		        if (i < BUF_SIZE)
 		        buf[i++] = temp;
@@ -281,18 +287,18 @@ int main(int argc, char *argv[])
 		          buf[i++] = temp;
 		          myCAM2.CS_LOW();
 		          myCAM2.set_fifo_burst();
-		        }        
+		        }
 		    }
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
 		      buf[i++] = temp_last;
-		      buf[i++] = temp;   
-		    } 
+		      buf[i++] = temp;
+		    }
 		  }
-       
+
        temp = 0;temp_last = 0; i = 0;
-       myCAM3.CS_LOW();  //Set CS low       
+       myCAM3.CS_LOW();  //Set CS low
        myCAM3.set_fifo_burst();
        while ( len3-- )
 		  {
@@ -301,18 +307,18 @@ int main(int argc, char *argv[])
 		    //Read JPEG data from FIFO
 		    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
 		    {
-		        buf[i++] = temp;  //save the last  0XD9     
+		        buf[i++] = temp;  //save the last  0XD9
 		       //Write the remain bytes in the buffer
 		        myCAM3.CS_HIGH();
-		        fwrite(buf, i, 1, fp3);    
+		        fwrite(buf, i, 1, fp3);
 		       //Close the file
-		        fclose(fp3); 
-		        printf("IMG3 save OK !\n"); 
+		        fclose(fp3);
+		        printf("IMG3 save OK !\n");
 		        is_header = false;
 		        i = 0;
-		    }  
+		    }
 		    if (is_header == true)
-		    { 
+		    {
 		       //Write image data to buffer if not full
 		        if (i < BUF_SIZE)
 		        buf[i++] = temp;
@@ -325,18 +331,18 @@ int main(int argc, char *argv[])
 		          buf[i++] = temp;
 		          myCAM3.CS_LOW();
 		          myCAM3.set_fifo_burst();
-		        }        
+		        }
 		    }
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
 		      buf[i++] = temp_last;
-		      buf[i++] = temp;   
-		    } 
+		      buf[i++] = temp;
+		    }
 		  }
-       
+
        temp = 0;temp_last = 0; i = 0;
-      myCAM4.CS_LOW();  //Set CS low       
+      myCAM4.CS_LOW();  //Set CS low
       myCAM4.set_fifo_burst();
        while ( len4-- )
 		  {
@@ -345,18 +351,18 @@ int main(int argc, char *argv[])
 		    //Read JPEG data from FIFO
 		    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
 		    {
-		        buf[i++] = temp;  //save the last  0XD9     
+		        buf[i++] = temp;  //save the last  0XD9
 		       //Write the remain bytes in the buffer
 		        myCAM4.CS_HIGH();
-		        fwrite(buf, i, 1, fp4);    
+		        fwrite(buf, i, 1, fp4);
 		       //Close the file
-		        fclose(fp4); 
-		        printf("IMG4 save OK !\n"); 
+		        fclose(fp4);
+		        printf("IMG4 save OK !\n");
 		        is_header = false;
 		        i = 0;
-		    }  
+		    }
 		    if (is_header == true)
-		    { 
+		    {
 		       //Write image data to buffer if not full
 		        if (i < BUF_SIZE)
 		        buf[i++] = temp;
@@ -369,20 +375,19 @@ int main(int argc, char *argv[])
 		          buf[i++] = temp;
 		          myCAM4.CS_LOW();
 		          myCAM4.set_fifo_burst();
-		        }        
+		        }
 		    }
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
 		      buf[i++] = temp_last;
-		      buf[i++] = temp;   
-		    } 
+		      buf[i++] = temp;
+		    }
 		  }
-      
+
     } else {
         printf("Error: unknown or missing argument.\n");
         exit(EXIT_FAILURE);
     }
     exit(EXIT_SUCCESS);
 }
-
