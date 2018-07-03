@@ -17,7 +17,7 @@
 #define OV5642_CHIPID_LOW 0x300b
 #define OV5642_MAX_FIFO_SIZE		0x7FFFFF		//8MByte
 #define BUF_SIZE 4096
-#define CAM1_CS 5
+#define CAM1_CS 0 // pin 17
 
 #define VSYNC_LEVEL_MASK   		0x02  //0 = High active , 		1 = Low active
 uint8_t buf[BUF_SIZE];
@@ -69,6 +69,12 @@ int main(int argc, char *argv[])
       setup();
       myCAM.set_format(JPEG);
       myCAM.InitCAM();
+			// Set shooting settings
+			myCAM.OV5642_set_Light_Mode(Simple_AWB);
+			myCAM.OV5642_set_Color_Saturation(Saturation_1);
+			myCAM.OV5642_set_Brightness(Brightness1);
+			myCAM.OV5642_set_Contrast(Contrast_1);
+			myCAM.OV5642_set_Exposure_level(Exposure07_EV);
       // Change to JPEG capture mode and initialize the OV2640 module
       if (strcmp(argv[3], "320x240")  == 0) myCAM.OV5642_set_JPEG_size(OV5642_320x240);
       else if (strcmp(argv[3], "640x480")  == 0) myCAM.OV5642_set_JPEG_size(OV5642_640x480);
@@ -141,7 +147,6 @@ int main(int argc, char *argv[])
 		          //Write BUF_SIZE bytes image data to file
 		          myCAM.CS_HIGH();
 		          fwrite(buf, BUF_SIZE, 1, fp1);
-							printf("Is header");
 		          i = 0;
 		          buf[i++] = temp;
 		          myCAM.CS_LOW();
@@ -151,7 +156,6 @@ int main(int argc, char *argv[])
 		    else if ((temp == 0xD8) & (temp_last == 0xFF))
 		    {
 		      is_header = true;
-					printf("Isn't header");
 		      buf[i++] = temp_last;
 		      buf[i++] = temp;
 		    }
